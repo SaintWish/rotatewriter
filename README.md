@@ -21,7 +21,7 @@ func main() {
   fileio := &rotatewriter.RotateWriter{
     Dir: "./runtime/logs/", //Required
     Filename: "log.log", //Required
-    ExTime: 24 * time.Hour, //Required if you want daily log rotation.
+    ExpireTime: 24 * time.Hour, //Required if you want daily log rotation.
     MaxSize: 5 * rotatewriter.Megabyte, //Can also use auralog.Kilobyte, Not required
   }
 }
