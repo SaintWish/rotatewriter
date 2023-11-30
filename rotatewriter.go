@@ -23,40 +23,17 @@ type RotateWriter struct {
 	Dir string // the directory to put log files.
 	Filename string // should be set to the actual filename and extension.
 	ExpireTime time.Duration // how often the log should rotate.
-	OldTime time.Duration // what age should logs be considered old.
 	MaxSize int64 // max size a log file is allowed to be in bytes.
 
-	lock sync.Mutex
+	mu sync.Mutex
 	now time.Time
 	fp *os.File
 }
 
-// Janitor - cleans up old log files in via directory.
-func (w *RotateWriter) Janitor() (error) {
-	items, err := os.ReadDir(w.Dir)
-	if err != nil {
-		return err
-	}
-
-	for _,item := range items {
-		if !item.IsDir() {
-			fi,_ := item.Info()
-
-			if ((time.Now().Sub(fi.ModTime()) > w.OldTime) && strings.Contains(fi.Name(), w.Filename)) {
-				if err := os.Remove(w.Dir+"/"+w.Filename); err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 // Write satisfies the io.Writer interface.
 func (w *RotateWriter) Write(output []byte) (int, error) {
-	w.lock.Lock()
-	defer w.lock.Unlock()
+	w.mu.Lock()
+	defer w.mu.Unlock()
 
 	if w.fp == nil {
 		if err := w.Resume(); err != nil {
@@ -128,13 +105,8 @@ func (w *RotateWriter) Rotate() error {
 
 // Rename the log file to include the current date. Uses RFC3339 time format.
 func (w *RotateWriter) renameFile() error {
-	var filename = w.Dir+w.Filename
-	newfn := filename[:len(filename)-len(filepath.Ext(w.Filename))]+"-"+time.Now().Format(time.RFC3339)+filepath.Ext(w.Filename)
-	err := os.Rename(filename, cleanName(newfn))
-	return err
-}
+	var fn = w.Dir+w.Filename
+	newfn := fn[:len(fn)-len(filepath.Ext(w.Filename))]+"-"+time.Now().Format(time.RFC3339)+filepath.Ext(w.Filename)
 
-// Replace : to _ for os.Rename.
-func cleanName(name string) string {
-	return strings.ReplaceAll(name, ":", "_")
+	return os.Rename(filename, strings.ReplaceAll(newFN))
 }
