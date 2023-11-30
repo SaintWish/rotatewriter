@@ -108,5 +108,5 @@ func (w *RotateWriter) renameFile() error {
 	var fn = w.Dir+w.Filename
 	newfn := fn[:len(fn)-len(filepath.Ext(w.Filename))]+"-"+time.Now().Format(time.RFC3339)+filepath.Ext(w.Filename)
 
-	return os.Rename(filename, strings.ReplaceAll(newFN))
+	return os.Rename(fn, strings.ReplaceAll(newfn, ":", "-"))
 }
