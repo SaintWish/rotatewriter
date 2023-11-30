@@ -105,8 +105,8 @@ func (w *RotateWriter) Rotate() error {
 
 // Rename the log file to include the current date. Uses RFC3339 time format.
 func (w *RotateWriter) renameFile() error {
-	var fn = w.Dir+w.Filename
-	newfn := fn[:len(fn)-len(filepath.Ext(w.Filename))]+"-"+time.Now().Format(time.RFC3339)+filepath.Ext(w.Filename)
+	var filename = w.Dir+w.Filename
+	newFilename := filename[:len(filename)-len(filepath.Ext(w.Filename))]+"-"+time.Now().Format(time.RFC3339)+filepath.Ext(w.Filename)
 
-	return os.Rename(fn, strings.ReplaceAll(newfn, ":", "-"))
+	return os.Rename(filename, strings.ReplaceAll(newFilename, ":", "-"))
 }
